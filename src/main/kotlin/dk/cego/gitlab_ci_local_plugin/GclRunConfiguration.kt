@@ -12,7 +12,6 @@ import com.intellij.openapi.project.Project
 import java.io.File
 
 class GclRunConfiguration(project: Project?, factory: ConfigurationFactory?, name: String?) :
-
     RunConfigurationBase<GclRunConfigurationOptions?>(project!!, factory, name) {
 
     override fun getOptions(): GclRunConfigurationOptions {
@@ -35,7 +34,9 @@ class GclRunConfiguration(project: Project?, factory: ConfigurationFactory?, nam
             @Throws(ExecutionException::class)
             override fun startProcess(): ProcessHandler {
                 val script = listOf(scriptName!!) + name.split(" ")
-                val commandLine = PtyCommandLine(WslUtils.rewriteToWslExec(project.basePath!!, script)).withInitialColumns(PtyCommandLine.MAX_COLUMNS)
+                val commandLine = PtyCommandLine(
+                    WslUtils.rewriteToWslExec(project.basePath!!, script)
+                ).withInitialColumns(PtyCommandLine.MAX_COLUMNS)
                 commandLine.workDirectory = File(project.basePath!!)
                 commandLine.charset = Charsets.UTF_8
                 val processHandler = ProcessHandlerFactory.getInstance().createColoredProcessHandler(commandLine)

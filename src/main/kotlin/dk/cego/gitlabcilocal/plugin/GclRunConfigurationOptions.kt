@@ -5,7 +5,7 @@ import com.intellij.execution.configurations.RunConfigurationOptions
 
 class GclRunConfigurationOptions : RunConfigurationOptions() {
 
-    private val scriptNameProperty= string("gitlab-ci-local")
+    private val scriptNameProperty = string("gitlab-ci-local")
         .provideDelegate(this, "scriptName")
 
     var scriptName: String

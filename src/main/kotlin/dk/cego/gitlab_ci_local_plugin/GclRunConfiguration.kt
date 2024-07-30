@@ -28,7 +28,9 @@ class GclRunConfiguration(project: Project?, factory: ConfigurationFactory?, nam
         return GclRunConfigurationEditor()
     }
 
-    override fun checkConfiguration() {}
+    override fun checkConfiguration() {
+        println("GclRunConfiguration checkConfiguration called")
+    }
     override fun getState(executor: Executor, executionEnvironment: ExecutionEnvironment): RunProfileState {
         return object : CommandLineState(executionEnvironment) {
             @Throws(ExecutionException::class)

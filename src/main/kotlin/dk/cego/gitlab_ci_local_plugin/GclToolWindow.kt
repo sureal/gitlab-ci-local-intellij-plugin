@@ -25,30 +25,31 @@ import javax.swing.tree.DefaultTreeModel
 import javax.swing.tree.TreePath
 
 class GclToolWindow(private var project: Project) {
-    private var jobsTree: JTree? = null
-    private var refreshButton: JButton? = null
-    private var panel: JPanel? = null
-    private var checkBox: JCheckBox? = null
-    private var schemaValidationCheckBox: JCheckBox? = null
+
+    private lateinit var jobsTree: JTree
+    private lateinit var refreshButton: JButton
+    private lateinit var panel: JPanel
+    private lateinit var checkBox: JCheckBox
+    private lateinit var schemaValidationCheckBox: JCheckBox
 
     init {
-        this.jobsTree?.model = DefaultTreeModel(DefaultMutableTreeNode(this.project.name))
+        this.jobsTree.model = DefaultTreeModel(DefaultMutableTreeNode(this.project.name))
         setupRefreshButton()
-        refresh()
+        //refresh()
     }
 
     private fun setupRefreshButton() {
-        refreshButton!!.icon = AllIcons.Actions.Refresh
-        refreshButton!!.text = "Refresh"
-        refreshButton!!.addActionListener { refresh() }
+        refreshButton.icon = AllIcons.Actions.Refresh
+        refreshButton.text = "Refresh"
+        refreshButton.addActionListener { refresh() }
     }
 
     private fun refresh() {
         val task: Task.Backgroundable = object : Task.Backgroundable(project, "Fetching Gitlab-CI jobs...", true) {
             override fun run(indicator: ProgressIndicator) {
-                refreshButton?.text = "..."
+                refreshButton.text = "..."
                 try {
-                    val output = runGclListCommand(schemaValidationCheckBox!!.isSelected)
+                    val output = runGclListCommand(schemaValidationCheckBox.isSelected)
                     if (output.exitCode != 0) {
                         val errorMessage = output.stderr.ifEmpty { output.stdout }
                         showErrorMessage(errorMessage)
@@ -64,12 +65,12 @@ class GclToolWindow(private var project: Project) {
                 } catch (e: ExecutionException) {
                     e.message?.let { showErrorMessage(it) }
                 }
-                refreshButton?.text = "Refresh"
+                refreshButton.text = "Refresh"
             }
 
             override fun onCancel() {
                 super.onCancel()
-                refreshButton?.text = "Refresh"
+                refreshButton.text = "Refresh"
             }
         }
         ProgressManager.getInstance().run(task)
@@ -80,7 +81,7 @@ class GclToolWindow(private var project: Project) {
         ApplicationManager.getApplication().invokeLater {
             JBPopupFactory.getInstance()
                 .createHtmlTextBalloonBuilder(
-                    "<html>Error:<br>${errorMessage}</html>",
+                    "<html>GitlabCiLocal Error:<br>${errorMessage}</html>",
                     null,
                     JBColor.BLACK,
                     JBColor.RED,
@@ -88,8 +89,7 @@ class GclToolWindow(private var project: Project) {
                 )
                 .createBalloon()
                 .show(
-                    JBPopupFactory.getInstance()
-                        .guessBestPopupLocation(refreshButton!!),
+                    JBPopupFactory.getInstance().guessBestPopupLocation(refreshButton),
                     Balloon.Position.atRight
                 )
         }
@@ -101,25 +101,16 @@ class GclToolWindow(private var project: Project) {
             "--list-json",
             "--json-schema-validation=${validateSchema}"
         )
+        val projectBasePath = project.basePath ?: throw RuntimeException("No base path in project")
         val cliCommand = GeneralCommandLine(
-            WslUtils.rewriteToWslExec(project.basePath!!, commandWithArgs)
+            WslUtils.rewriteToWslExec(projectBasePath, commandWithArgs)
         ).withRedirectErrorStream(true)
-        cliCommand.workDirectory = File(project.basePath!!)
+        cliCommand.workDirectory = File(projectBasePath)
         return ExecUtil.execAndGetOutput(cliCommand)
     }
 
     fun showGclJobsInJobTree(jobs: List<GclJob>) {
-        // group jobs by stage
-        val stages = mutableListOf<GclStage>()
-        for (job in jobs) {
-            var stage = stages.find { it.stage == job.stage }
-            if (stage == null) {
-                stage = GclStage(job.stage, ArrayList())
-                stages.add(stage)
-            }
-            // add to list
-            stage.jobs.add(job)
-        }
+        val stages = GclStage.stagesFromJobs(jobs)
 
         // create jobsTree
         val root = DefaultMutableTreeNode(project.name)
@@ -137,15 +128,15 @@ class GclToolWindow(private var project: Project) {
         renderer.openIcon = AllIcons.Nodes.Folder
         renderer.closedIcon = AllIcons.Nodes.Folder
         // on
-        jobsTree?.cellRenderer = renderer
-        jobsTree?.model = DefaultTreeModel(root)
+        jobsTree.cellRenderer = renderer
+        jobsTree.model = DefaultTreeModel(root)
 
-        for (i in 0 until jobsTree!!.visibleRowCount) {
-            jobsTree!!.expandPath(jobsTree!!.getPathForRow(i))
+        for (i in 0 until jobsTree.visibleRowCount) {
+            jobsTree.expandPath(jobsTree.getPathForRow(i))
         }
 
-        addMouseListener(jobsTree!!)
-        jobsTree?.fireTreeExpanded(TreePath(root))
+        addMouseListener(jobsTree)
+        jobsTree.fireTreeExpanded(TreePath(root))
     }
 
     private fun addMouseListener(tree: JTree) {
@@ -155,8 +146,8 @@ class GclToolWindow(private var project: Project) {
                 val selectedPath: TreePath? = tree.getPathForLocation(e.x, e.y)
                 if (selectedPath != null && selectedPath.pathCount > 2 && selectedRow != -1 && e.clickCount == 2) {
 
-                    val needsArgument = if (checkBox!!.isSelected) "--needs" else "--no-needs"
-                    val schemaValidationArgument = "--schema-validation=${schemaValidationCheckBox!!.isSelected}"
+                    val needsArgument = if (checkBox.isSelected) "--needs" else "--no-needs"
+                    val schemaValidationArgument = "--schema-validation=${schemaValidationCheckBox.isSelected}"
                     val script = "${selectedPath.path[2]} $needsArgument $schemaValidationArgument"
                     val runManager = RunManager.getInstance(project)
                     val configuration = runManager.createConfiguration(script, GclRunConfigurationType::class.java)
@@ -171,6 +162,6 @@ class GclToolWindow(private var project: Project) {
         tree.addMouseListener(ml)
     }
 
-    val content: JComponent?
+    val content: JComponent
         get() = panel
 }

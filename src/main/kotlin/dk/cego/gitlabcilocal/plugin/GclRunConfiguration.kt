@@ -40,7 +40,11 @@ class GclRunConfiguration(
             override fun startProcess(): ProcessHandler {
                 val projectBasePath = project.basePath ?: throw ExecutionException("Cannot find project's base path")
 
-                val script = listOf(scriptName) + name.split(" ")
+                val hasNeeds = name.contains("--needs")
+                val job = name.split("--").first().trim()
+                val needsArg = (if (hasNeeds) "--needs" else "--no-needs")
+                val script = listOf(scriptName, job, needsArg)
+                println("GclRunConfiguration - startProcess: script: $script")
                 val commandLine = PtyCommandLine(
                     WslUtils.rewriteToWslExec(projectBasePath, script)
                 ).withInitialColumns(PtyCommandLine.MAX_COLUMNS)

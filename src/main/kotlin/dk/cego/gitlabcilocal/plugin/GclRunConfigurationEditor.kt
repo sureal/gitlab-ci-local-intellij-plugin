@@ -15,7 +15,7 @@ class GclRunConfigurationEditor : SettingsEditor<GclRunConfiguration>() {
   }
 
   override fun applyEditorTo(demoRunConfiguration: GclRunConfiguration) {
-    demoRunConfiguration.scriptName = (scriptNameLabel.component.text)
+    demoRunConfiguration.scriptName = scriptNameLabel.component.text
   }
 
   override fun createEditor(): JComponent {

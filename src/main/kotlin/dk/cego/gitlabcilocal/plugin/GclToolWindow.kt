@@ -143,7 +143,7 @@ class GclToolWindow(private var project: Project) {
         val ml: MouseListener = object : MouseAdapter() {
             override fun mousePressed(e: MouseEvent) {
                 val selectedRow = tree.getRowForLocation(e.x, e.y)
-                val selectedPath: TreePath? = tree.getPathForLocation(e.x, e.y)
+                val selectedPath = tree.getPathForLocation(e.x, e.y)
                 if (selectedPath != null && selectedPath.pathCount > 2 && selectedRow != -1 && e.clickCount == 2) {
 
                     val needsArgument = if (checkBox.isSelected) "--needs" else "--no-needs"

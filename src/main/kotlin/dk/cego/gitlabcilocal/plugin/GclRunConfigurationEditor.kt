@@ -7,22 +7,23 @@ import javax.swing.JComponent
 import javax.swing.JPanel
 
 class GclRunConfigurationEditor : SettingsEditor<GclRunConfiguration>() {
-  private val myPanel: JPanel? = null
-  private var myScriptName: LabeledComponent<TextFieldWithBrowseButton>? = null
+  private lateinit var settingsPanel: JPanel
+  private lateinit var scriptNameLabel: LabeledComponent<TextFieldWithBrowseButton>
+
   override fun resetEditorFrom(gclRunConfiguration: GclRunConfiguration) {
-    myScriptName!!.component.text = gclRunConfiguration.scriptName.toString()
+    scriptNameLabel.component.text = gclRunConfiguration.scriptName
   }
 
   override fun applyEditorTo(demoRunConfiguration: GclRunConfiguration) {
-    demoRunConfiguration.scriptName = (myScriptName!!.component.text)
+    demoRunConfiguration.scriptName = (scriptNameLabel.component.text)
   }
 
   override fun createEditor(): JComponent {
-    return myPanel!!
+    return settingsPanel
   }
 
   private fun createUIComponents() {
-    myScriptName = LabeledComponent()
-    myScriptName!!.component = TextFieldWithBrowseButton()
+    scriptNameLabel = LabeledComponent()
+    scriptNameLabel.component = TextFieldWithBrowseButton()
   }
 }

@@ -11,14 +11,17 @@ import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.project.Project
 import java.io.File
 
-class GclRunConfiguration(project: Project?, factory: ConfigurationFactory?, name: String?) :
-    RunConfigurationBase<GclRunConfigurationOptions?>(project!!, factory, name) {
+class GclRunConfiguration(
+    project: Project,
+    factory: ConfigurationFactory,
+    name: String
+) : RunConfigurationBase<GclRunConfigurationOptions>(project, factory, name) {
 
     override fun getOptions(): GclRunConfigurationOptions {
         return super.getOptions() as GclRunConfigurationOptions
     }
 
-    var scriptName: String?
+    var scriptName: String
         get() = options.scriptName
         set(scriptName) {
             options.scriptName = scriptName
@@ -35,11 +38,12 @@ class GclRunConfiguration(project: Project?, factory: ConfigurationFactory?, nam
         return object : CommandLineState(executionEnvironment) {
             @Throws(ExecutionException::class)
             override fun startProcess(): ProcessHandler {
-                val script = listOf(scriptName!!) + name.split(" ")
+                val script = listOf(scriptName) + name.split(" ")
                 val commandLine = PtyCommandLine(
                     WslUtils.rewriteToWslExec(project.basePath!!, script)
                 ).withInitialColumns(PtyCommandLine.MAX_COLUMNS)
-                commandLine.workDirectory = File(project.basePath!!)
+                val projectBasePath = project.basePath ?: throw ExecutionException("Cannot find project's base path")
+                commandLine.workDirectory = File(projectBasePath)
                 commandLine.charset = Charsets.UTF_8
                 val processHandler = ProcessHandlerFactory.getInstance().createColoredProcessHandler(commandLine)
                 ProcessTerminatedListener.attach(processHandler)

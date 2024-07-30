@@ -7,7 +7,7 @@ import com.intellij.execution.configurations.RunConfiguration
 import com.intellij.openapi.components.BaseState
 import com.intellij.openapi.project.Project
 
-class GclRunConfigurationFactory(type: ConfigurationType?) : ConfigurationFactory(type!!) {
+class GclRunConfigurationFactory(type: ConfigurationType) : ConfigurationFactory(type) {
     override fun getId(): String {
         return GclRunConfigurationType.ID
     }

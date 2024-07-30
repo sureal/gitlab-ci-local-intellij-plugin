@@ -1,4 +1,4 @@
-package dk.cego.gitlab_ci_local_plugin
+package dk.cego.gitlabcilocal.plugin
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow

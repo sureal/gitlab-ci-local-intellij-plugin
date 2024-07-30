@@ -1,4 +1,4 @@
-package dk.cego.gitlab_ci_local_plugin
+package dk.cego.gitlabcilocal.plugin
 
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.ui.LabeledComponent

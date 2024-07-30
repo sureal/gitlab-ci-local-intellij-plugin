@@ -1,4 +1,4 @@
-package dk.cego.gitlab_ci_local_plugin
+package dk.cego.gitlabcilocal.plugin
 
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.Executor

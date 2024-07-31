@@ -9,6 +9,7 @@ import com.intellij.execution.process.ProcessTerminatedListener
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.project.Project
+import dk.cego.gitlabcilocal.plugin.extensions.obtainRootDirPath
 import java.io.File
 
 class GclRunConfiguration(
@@ -38,15 +39,19 @@ class GclRunConfiguration(
         return object : CommandLineState(executionEnvironment) {
             @Throws(ExecutionException::class)
             override fun startProcess(): ProcessHandler {
-                val projectBasePath = project.basePath ?: throw ExecutionException("Cannot find project's base path")
+                val projectBasePath = project.obtainRootDirPath()
 
-                val hasNeeds = name.contains("--needs")
-                val job = name.split("--").first().trim()
-                val needsArg = (if (hasNeeds) "--needs" else "--no-needs")
-                val script = listOf(scriptName, job, needsArg)
-                println("GclRunConfiguration - startProcess: script: $script")
+                // original
+                println("scriptName: $scriptName")
+                println("name: $name")
+                //val script = listOf(scriptName) + name.split(" ")
+
+                val scriptParts = scriptName.split("--").map { it.trim() }
+                val arguments = scriptParts.map { "--$it" }
+                val commandList = listOf(scriptParts.first()) + arguments.subList(1, arguments.size)
+                println("GclRunConfiguration - startProcess: script: $commandList")
                 val commandLine = PtyCommandLine(
-                    WslUtils.rewriteToWslExec(projectBasePath, script)
+                    WslUtils.rewriteToWslExec(projectBasePath, commandList)
                 ).withInitialColumns(PtyCommandLine.MAX_COLUMNS)
                 commandLine.workDirectory = File(projectBasePath)
                 commandLine.charset = Charsets.UTF_8

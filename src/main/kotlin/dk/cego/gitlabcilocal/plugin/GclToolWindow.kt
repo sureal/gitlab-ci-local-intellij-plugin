@@ -14,6 +14,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.Balloon
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.ui.JBColor
+import dk.cego.gitlabcilocal.plugin.extensions.obtainRootDirPath
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.event.MouseListener
@@ -101,7 +102,7 @@ class GclToolWindow(private var project: Project) {
             "--list-json",
             "--json-schema-validation=${validateSchema}"
         )
-        val projectBasePath = project.basePath ?: throw RuntimeException("No base path in project")
+        val projectBasePath = project.obtainRootDirPath()
         val cliCommand = GeneralCommandLine(
             WslUtils.rewriteToWslExec(projectBasePath, commandWithArgs)
         ).withRedirectErrorStream(true)
